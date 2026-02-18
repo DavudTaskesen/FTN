@@ -8,7 +8,9 @@ const incomeBtn = document.getElementById("incomeBtn");
 const expenseBtn = document.getElementById("expenseBtn");
 const historyEl = document.getElementById("history");
 
-let chart;
+let lineChart;
+let pieChart;
+
 let chartData = {
     labels: [],
     income: [],
@@ -24,7 +26,7 @@ function loadData() {
     if (saved) {
         transactions = JSON.parse(saved);
         transactions.forEach(t => applyTransaction(t, false));
-        updateChart();
+        updateCharts();
     }
 }
 
@@ -50,19 +52,17 @@ function getDate() {
         "July", "August", "September", "October", "November", "December"
     ];
 
-    const day = now.getDate();
-    const month = months[now.getMonth()];
-    const year = now.getFullYear();
-
-    return `${day} ${month}, ${year}`;
+    return `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 }
 
-function updateChart() {
-    if (chart) chart.destroy();
+function updateCharts() {
+    if (lineChart) lineChart.destroy();
+    if (pieChart) pieChart.destroy();
 
-    const ctx = document.getElementById("chartCanvas").getContext("2d");
+    const ctx1 = document.getElementById("chartCanvas").getContext("2d");
+    const ctx2 = document.getElementById("pieCanvas").getContext("2d");
 
-    chart = new Chart(ctx, {
+    lineChart = new Chart(ctx1, {
         type: "line",
         data: {
             labels: chartData.labels,
@@ -80,6 +80,20 @@ function updateChart() {
                     fill: false
                 }
             ]
+        }
+    });
+
+    const totalIncome = chartData.income.reduce((a, b) => a + b, 0);
+    const totalExpense = chartData.expense.reduce((a, b) => a + b, 0);
+
+    pieChart = new Chart(ctx2, {
+        type: "pie",
+        data: {
+            labels: ["Total Income", "Total Expense"],
+            datasets: [{
+                data: [totalIncome, totalExpense],
+                backgroundColor: ["green", "red"]
+            }]
         }
     });
 }
@@ -107,12 +121,29 @@ function addHistoryItem(t) {
 
         updateBalance();
         li.remove();
-        updateChart();
+        rebuildCharts();
     });
 
     li.appendChild(text);
     li.appendChild(deleteBtn);
     historyEl.appendChild(li);
+}
+
+function rebuildCharts() {
+    chartData = { labels: [], income: [], expense: [] };
+
+    transactions.forEach(t => {
+        chartData.labels.push(t.date);
+        if (t.type === "income") {
+            chartData.income.push(t.amount);
+            chartData.expense.push(0);
+        } else {
+            chartData.income.push(0);
+            chartData.expense.push(Math.abs(t.amount));
+        }
+    });
+
+    updateCharts();
 }
 
 function applyTransaction(t, save = true) {
@@ -148,7 +179,7 @@ incomeBtn.addEventListener("click", () => {
 
         transactions.push(t);
         applyTransaction(t);
-        updateChart();
+        updateCharts();
     }
 });
 
@@ -166,7 +197,7 @@ expenseBtn.addEventListener("click", () => {
 
         transactions.push(t);
         applyTransaction(t);
-        updateChart();
+        updateCharts();
     }
 });
 
