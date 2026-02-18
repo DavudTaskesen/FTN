@@ -1,4 +1,5 @@
 let balance = 0;
+let transactions = [];
 
 const balanceEl = document.getElementById("balance");
 const amountEl = document.getElementById("amount");
@@ -13,6 +14,19 @@ let chartData = {
     income: [],
     expense: []
 };
+
+function saveData() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+function loadData() {
+    const saved = localStorage.getItem("transactions");
+    if (saved) {
+        transactions = JSON.parse(saved);
+        transactions.forEach(t => applyTransaction(t, false));
+        updateChart();
+    }
+}
 
 function updateBalance() {
     balanceEl.textContent = balance;
@@ -70,25 +84,30 @@ function updateChart() {
     });
 }
 
-function addHistory(amount, note, type) {
+function addHistoryItem(t) {
     const li = document.createElement("li");
-    li.classList.add(type);
+    li.classList.add(t.type);
 
     const text = document.createElement("span");
-    text.textContent = `${amount} € - ${note || "No description"} - (${getDate()})`;
+    text.textContent = `${t.amount} € - ${t.note || "No description"} - (${t.date})`;
 
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete";
     deleteBtn.classList.add("delete-btn");
 
     deleteBtn.addEventListener("click", () => {
-        if (type === "income") {
-            balance -= amount;
+        if (t.type === "income") {
+            balance -= t.amount;
         } else {
-            balance += Math.abs(amount);
+            balance += Math.abs(t.amount);
         }
+
+        transactions = transactions.filter(x => x !== t);
+        saveData();
+
         updateBalance();
         li.remove();
+        updateChart();
     });
 
     li.appendChild(text);
@@ -96,18 +115,39 @@ function addHistory(amount, note, type) {
     historyEl.appendChild(li);
 }
 
+function applyTransaction(t, save = true) {
+    if (t.type === "income") {
+        balance += t.amount;
+        chartData.income.push(t.amount);
+        chartData.expense.push(0);
+    } else {
+        balance -= Math.abs(t.amount);
+        chartData.income.push(0);
+        chartData.expense.push(Math.abs(t.amount));
+    }
+
+    chartData.labels.push(t.date);
+
+    addHistoryItem(t);
+    updateBalance();
+
+    if (save) saveData();
+}
+
 incomeBtn.addEventListener("click", () => {
     const amount = Number(amountEl.value);
     const note = noteEl.value;
 
     if (!isNaN(amount) && amount !== 0) {
-        balance += amount;
-        updateBalance();
-        addHistory(amount, note, "income");
+        const t = {
+            amount,
+            note,
+            type: "income",
+            date: getDate()
+        };
 
-        chartData.labels.push(getDate());
-        chartData.income.push(amount);
-        chartData.expense.push(0);
+        transactions.push(t);
+        applyTransaction(t);
         updateChart();
     }
 });
@@ -117,13 +157,17 @@ expenseBtn.addEventListener("click", () => {
     const note = noteEl.value;
 
     if (!isNaN(amount) && amount !== 0) {
-        balance -= amount;
-        updateBalance();
-        addHistory(-amount, note, "expense");
+        const t = {
+            amount: -amount,
+            note,
+            type: "expense",
+            date: getDate()
+        };
 
-        chartData.labels.push(getDate());
-        chartData.income.push(0);
-        chartData.expense.push(amount);
+        transactions.push(t);
+        applyTransaction(t);
         updateChart();
     }
 });
+
+loadData();
