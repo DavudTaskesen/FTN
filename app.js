@@ -7,6 +7,13 @@ const incomeBtn = document.getElementById("incomeBtn");
 const expenseBtn = document.getElementById("expenseBtn");
 const historyEl = document.getElementById("history");
 
+let chart;
+let chartData = {
+    labels: [],
+    income: [],
+    expense: []
+};
+
 function updateBalance() {
     balanceEl.textContent = balance;
 
@@ -24,7 +31,43 @@ function updateBalance() {
 
 function getDate() {
     const now = new Date();
-    return now.toLocaleString("en-EN");
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const day = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+
+    return `${day} ${month}, ${year}`;
+}
+
+function updateChart() {
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById("chartCanvas").getContext("2d");
+
+    chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                {
+                    label: "Income",
+                    data: chartData.income,
+                    borderColor: "green",
+                    fill: false
+                },
+                {
+                    label: "Expense",
+                    data: chartData.expense,
+                    borderColor: "red",
+                    fill: false
+                }
+            ]
+        }
+    });
 }
 
 function addHistory(amount, note, type) {
@@ -61,6 +104,11 @@ incomeBtn.addEventListener("click", () => {
         balance += amount;
         updateBalance();
         addHistory(amount, note, "income");
+
+        chartData.labels.push(getDate());
+        chartData.income.push(amount);
+        chartData.expense.push(0);
+        updateChart();
     }
 });
 
@@ -72,5 +120,10 @@ expenseBtn.addEventListener("click", () => {
         balance -= amount;
         updateBalance();
         addHistory(-amount, note, "expense");
+
+        chartData.labels.push(getDate());
+        chartData.income.push(0);
+        chartData.expense.push(amount);
+        updateChart();
     }
 });
