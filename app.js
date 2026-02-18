@@ -7,6 +7,7 @@ const noteEl = document.getElementById("note");
 const incomeBtn = document.getElementById("incomeBtn");
 const expenseBtn = document.getElementById("expenseBtn");
 const historyEl = document.getElementById("history");
+const searchEl = document.getElementById("search");
 
 let lineChart;
 let pieChart;
@@ -199,6 +200,21 @@ expenseBtn.addEventListener("click", () => {
         applyTransaction(t);
         updateCharts();
     }
+});
+
+/* --- ARAMA FİLTRESİ --- */
+searchEl.addEventListener("input", () => {
+    const keyword = searchEl.value.toLowerCase();
+
+    historyEl.innerHTML = "";
+
+    transactions
+        .filter(t =>
+            t.note.toLowerCase().includes(keyword) ||
+            t.date.toLowerCase().includes(keyword) ||
+            String(t.amount).includes(keyword)
+        )
+        .forEach(t => addHistoryItem(t));
 });
 
 loadData();
