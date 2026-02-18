@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracking Application</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Finance Tracking Application</h1>
+
+    <div class="balance-box">
+        Balance: <span id="balance">0</span> €
+    </div>
+
+    <div class="controls">
+        <input type="number" id="amount" placeholder="Amount">
+        <input type="text" id="note" placeholder="Description (optional)">
+        <button id="incomeBtn">Income</button>
+        <button id="expenseBtn">Expense</button>
+    </div>
+
+    <h2>Transaction History</h2>
+    <ul id="history"></ul>
+
+    <script src="app.js"></script>
+</body>
+</html>
