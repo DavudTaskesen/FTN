@@ -24,7 +24,7 @@ function updateBalance() {
 
 function getDate() {
     const now = new Date();
-    return now.toLocaleString("de-DE");
+    return now.toLocaleString("en-EN");
 }
 
 function addHistory(amount, note, type) {
