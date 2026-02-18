@@ -22,12 +22,17 @@ function updateBalance() {
     }
 }
 
+function getDate() {
+    const now = new Date();
+    return now.toLocaleString("de-DE");
+}
+
 function addHistory(amount, note, type) {
     const li = document.createElement("li");
     li.classList.add(type);
 
     const text = document.createElement("span");
-    text.textContent = `${amount} € - ${note || "No description"}`;
+    text.textContent = `${amount} € - ${note || "No description"} - (${getDate()})`;
 
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "Delete";
