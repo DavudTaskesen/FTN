@@ -8,6 +8,7 @@ const incomeBtn = document.getElementById("incomeBtn");
 const expenseBtn = document.getElementById("expenseBtn");
 const historyEl = document.getElementById("history");
 const searchEl = document.getElementById("search");
+const themeToggle = document.getElementById("themeToggle");
 
 let lineChart;
 let pieChart;
@@ -20,10 +21,17 @@ let chartData = {
 
 function saveData() {
     localStorage.setItem("transactions", JSON.stringify(transactions));
+    localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
 }
 
 function loadData() {
     const saved = localStorage.getItem("transactions");
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+    }
+
     if (saved) {
         transactions = JSON.parse(saved);
         transactions.forEach(t => applyTransaction(t, false));
@@ -63,6 +71,8 @@ function updateCharts() {
     const ctx1 = document.getElementById("chartCanvas").getContext("2d");
     const ctx2 = document.getElementById("pieCanvas").getContext("2d");
 
+    const isDark = document.body.classList.contains("dark");
+
     lineChart = new Chart(ctx1, {
         type: "line",
         data: {
@@ -71,13 +81,13 @@ function updateCharts() {
                 {
                     label: "Income",
                     data: chartData.income,
-                    borderColor: "green",
+                    borderColor: isDark ? "orange" : "green",
                     fill: false
                 },
                 {
                     label: "Expense",
                     data: chartData.expense,
-                    borderColor: "red",
+                    borderColor: isDark ? "blue" : "red",
                     fill: false
                 }
             ]
@@ -93,7 +103,9 @@ function updateCharts() {
             labels: ["Total Income", "Total Expense"],
             datasets: [{
                 data: [totalIncome, totalExpense],
-                backgroundColor: ["green", "red"]
+                backgroundColor: isDark
+                    ? ["orange", "blue"]
+                    : ["green", "red"]
             }]
         }
     });
@@ -215,6 +227,13 @@ searchEl.addEventListener("input", () => {
             String(t.amount).includes(keyword)
         )
         .forEach(t => addHistoryItem(t));
+});
+
+/* --- KARANLIK MOD --- */
+themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    saveData();
+    updateCharts();
 });
 
 loadData();
