@@ -32,7 +32,13 @@ body {
     color: black;
 }
 
-/* --- BAKİYE RENKLERİ --- */
+/* --- BAKİYE YAZISI BÜYÜTÜLDÜ --- */
+.balance-box {
+    font-size: 40px;   /* ESKİ: 28px */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
 #balance.green {
     color: green;
 }
@@ -98,7 +104,6 @@ button {
     color: white;
 }
 
-/* GELİR / GİDER RENKLERİ */
 .income {
     border-color: green;
 }
@@ -115,7 +120,6 @@ button {
     border-color: blue;
 }
 
-/* SİLME BUTONU */
 .delete-btn {
     background: red;
     color: white;
